@@ -1,0 +1,118 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.bg-orange {
+    background-color: #ff7f00;
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+}
+/* Estilo para o botão flutuante */
+.floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+#main-btn {
+    width: 60px;
+    height: 60px;
+}
+
+.sub-btns {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sub-btns.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.sub-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+/* Estilo para o Modal Melhorado */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Gradiente para o Botão de Enviar */
+.btn-gradient {
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    border: none;
+    color: white;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-gradient:hover {
+    background: linear-gradient(to right, #feb47b, #ff7e5f);
+    transform: translateY(-2px);
+}
+
+/* Animação de entrada para o Modal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Melhorando o estilo dos inputs */
+.form-control-lg {
+    border: 1px solid #ddd;
+    transition: border-color 0.3s;
+}
+
+.form-control-lg:focus {
+    border-color: #6a11cb;
+    box-shadow: 0 0 0 0.2rem rgba(106, 17, 203, 0.25);
+}
+
+/* Estilo do botão de fechar */
+.btn-close-white {
+    filter: invert(1);
+}
+
+

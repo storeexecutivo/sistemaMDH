@@ -1,0 +1,456 @@
+      .alerts-container {
+          position: fixed;
+          top: 80px; /* altura da barra de navegação */
+          right: 0;
+          width: 285px; /* largura da área de alertas */
+          max-height: calc(100vh - 50px); /* altura máxima igual à altura da tela menos a altura da barra de navegação */
+          padding: 20px;
+          background-color: #f8f9fa; /* cor de fundo */
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          z-index: 99;
+          overflow-y: auto; /* adicionar barra de rolagem vertical quando necessário */
+      }
+
+      .container{
+      margin-top:100px;
+
+      }
+
+
+      .list-group {
+          margin-bottom: 0; /* remove o espaço extra no final da lista */
+      }
+
+      .list-group-item {
+          border: none;
+          border-radius: 0;
+          margin-bottom: 5px; /* espaço entre os alertas */
+      }
+
+        #map {
+            height: 600px;
+            margin-bottom: 20px;
+        }
+        .bus-popup {
+            max-width: 300px;
+        }
+        .bus-popup strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .bus-popup p {
+            margin-bottom: 4px;
+        }
+        .waypoint-item {
+            margin-bottom: 10px;
+        }
+      .alert-info {
+          background-color: #d1ecf1; /* cor de fundo para alertas informativos */
+          border-color: #bee5eb; /* cor da borda para alertas informativos */
+          color: #0c5460; /* cor do texto para alertas informativos */
+      }
+
+      .alert-warning {
+          background-color: #fff3cd; /* cor de fundo para alertas de aviso */
+          border-color: #ffeeba; /* cor da borda para alertas de aviso */
+          color: #856404; /* cor do texto para alertas de aviso */
+      }
+
+      .alert-danger {
+          background-color: #f8d7da; /* cor de fundo para alertas de perigo */
+          border-color: #f5c6cb; /* cor da borda para alertas de perigo */
+          color: #721c24; /* cor do texto para alertas de perigo */
+      }
+
+    /* Estilos para a sidebar */
+     .col-md-9.col-lg-10 {
+            margin-left: 160px; /* ou qualquer valor que você prefira */
+        }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      padding-top: 4rem; /* Ajuste para evitar sobreposição com navbar */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+      background-color: #343a40; /* Cor de fundo da sidebar */
+      color: #ffffff; /* Cor do texto na sidebar */
+      transition: width 0.3s ease; /* Transição suave para largura da sidebar */
+    }
+
+    .sidebar-sticky {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 4rem; /* Altura da navbar */
+      height: calc(100vh - 4rem);
+      padding-top: 1rem;
+      overflow-x: hidden;
+      overflow-y: auto; /* Scrolling do menu */
+    }
+
+    .sidebar .nav-link {
+      color: #ffffff; /* Cor do texto dos links na sidebar */
+      transition: all 0.3s ease; /* Transição suave para hover dos links */
+    }
+
+    .sidebar .nav-link:hover {
+      color: #f8f9fa; /* Cor do texto dos links na sidebar ao passar o mouse */
+      background-color: #495057; /* Cor de fundo do link na sidebar ao passar o mouse */
+    }
+
+    .navbar-brand {
+      font-size: 30px; /* Tamanho da fonte aumentado para 24 pixels */
+    }
+
+    .nav-link {
+      font-size: 20px; /* Tamanho da fonte para os links na sidebar */
+    }
+
+    /* Tamanho da fonte para o conteúdo principal */
+    .main-content {
+      font-size: 20px; /* Tamanho da fonte para o conteúdo principal */
+    }
+
+    /* Estilo para o conteúdo principal */
+    .main-content {
+      transition: margin-left 0.3s ease; /* Transição suave para margin-left */
+    }
+
+    /* Estilo para o cabeçalho */
+    .header {
+      background-color: #007bff; /* Cor de fundo do cabeçalho */
+      color: #ffffff; /* Cor do texto do cabeçalho */
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+    }
+
+    /* Estilo para os modais */
+    .modal-content {
+      border-radius: 6px;
+    }
+
+    .modal-header {
+      background-color: #007bff; /* Cor de fundo do cabeçalho do modal */
+      color: #ffffff; /* Cor do texto do cabeçalho do modal */
+      border-bottom: none; /* Sem borda inferior no cabeçalho do modal */
+    }
+
+    .modal-footer {
+      border-top: none; /* Sem borda superior no rodapé do modal */
+    }
+
+    /* Estilo para botões */
+    .btn-primary {
+      background-color: #007bff; /* Cor de fundo do botão primário */
+      border-color: #007bff; /* Cor da borda do botão primário */
+      transition: background-color 0.3s ease, border-color 0.3s ease; /* Transições suaves */
+    }
+
+    .btn-primary:hover {
+      background-color: #0069d9; /* Cor de fundo do botão primário ao passar o mouse */
+      border-color: #0062cc; /* Cor da borda do botão primário ao passar o mouse */
+    }
+
+    .btn-secondary {
+      background-color: #6c757d; /* Cor de fundo do botão secundário */
+      border-color: #6c757d; /* Cor da borda do botão secundário */
+      transition: background-color 0.3s ease, border-color 0.3s ease; /* Transições suaves */
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268; /* Cor de fundo do botão secundário ao passar o mouse */
+      border-color: #545b62; /* Cor da borda do botão secundário ao passar o mouse */
+    }
+
+    /* Estilos personalizados avançados aqui */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      /* Outros estilos conforme necessário */
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+    .user-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .user-profile .username {
+      color: #fff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .user-profile .dropdown-toggle::after {
+      margin-left: 5px;
+    }
+
+
+
+    /* Ajuste para responsividade */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 60px; /* Largura reduzida da sidebar */
+        transition: width 0.3s ease; /* Transição suave para largura da sidebar */
+      }
+
+      .sidebar .nav-link {
+        text-align: center; /* Centraliza texto dos links na sidebar */
+      }
+
+      .container {
+        margin-top:50px;
+        transition: margin-left 0.3s ease; /* Transição suave para margin-left */
+      }
+    }
+
+      /* Estilos CSS personalizados */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    #mapi {
+            height: 400px;
+            width: 100%;
+        }
+
+    .alert-info {
+      background-color: #17a2b8;
+      color: white;
+    }
+    #map {
+        height: 89vh; /* Altura ajustável responsivamente */
+        margin-top: 75px;
+    }
+
+    .alert-warning {
+      background-color: #ffc107;
+      color: white;
+    }
+
+    #flash-messages {
+      position: fixed;
+      top: 20px;
+      right: 0px; /* Inicialmente fora da tela */
+      z-index: 1050;
+      width: 170px;
+      padding: 15px;
+      background-color: red; /* Fundo semi-transparente */
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+      transition: transform 0.5s ease-in-out;
+      display: flex;
+      align-items: center;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%); /* Começa fora da tela à direita */
+      }
+      to {
+        transform: translateX(0); /* Entra na tela */
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0); /* Começa na posição visível */
+      }
+      to {
+        transform: translateX(100%); /* Sai para fora da tela à direita */
+      }
+    }
+
+    #flash-messages.show {
+      animation: slideIn 0.5s forwards, slideOut 0.5s forwards 2.5s; /* Animações de entrada e saída */
+    }
+
+    .btn-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: white;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+
+    .btn-close:hover {
+      opacity: 1;
+    }
+
+    #flash-messages ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    .navbar {
+      background-color: #007bff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .sidebar,
+    .sidebar-mobile {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      background-color: #343a40;
+      padding-top: 20px;
+      width: 250px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-mobile {
+      display: none;
+      transition: left 0.3s ease;
+      padding-top: 50px;
+      font-size: 54px;
+      color:white;
+      top: 50;
+    }
+
+    .sidebar-mobile span {
+      color: white;
+      font-size: 18px;
+    }
+
+    .sidebar-mobile .dropdown-toggle{
+      color: white; /* Garante que os links dentro do sidebar móvel sejam brancos */
+    }
+
+    .sidebar-mobile i {
+      color: white; /* Garante que os links dentro do sidebar móvel sejam brancos */
+
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        display: none;
+      }
+
+      .sidebar-mobile {
+        display: block;
+        left: -250px; /* Inicialmente escondido fora da tela */
+      }
+
+      .sidebar-mobile.open {
+        left: 0; /* Mostra o sidebar quando aberto */
+      }
+    }
+
+
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+
+    .user-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .user-profile .username {
+      color: #fff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .user-profile .dropdown-toggle::after {
+      margin-left: 5px;
+    }
+
+    .alerts-container {
+      position: fixed;
+      top: 60px;
+      right: 0;
+      width: 300px;
+      z-index: 100;
+      padding: 10px;
+    }
+
+
+    .alert {
+      margin-bottom: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+
+
+    @media (max-width: 991.98px) { /* Tamanhos menores que LG */
+      .main-content {
+        margin-left: 0;
+        margin-top: 20px; /* Ajusta margem do conteúdo principal */
+      }
+    }
+
+    @media (max-width: 767.98px) { /* Tamanhos menores que MD */
+      body {
+        font-size: 14px; /* Reduz o tamanho da fonte do corpo */
+      }
+
+      /* Ajusta o tamanho da fonte nos itens do sidebar */
+      .sidebar .nav-link,
+      .sidebar-mobile .nav-link {
+        font-size: 14px;
+      }
+
+      /* Ajusta o tamanho da fonte nos itens do navbar */
+      .navbar .nav-link {
+        font-size: 14px;
+      }
+
+      .navbar .navbar-brand {
+        font-size: 15px;
+      }
+
+      .btn-responsive .btn,
+        .btn-responsive .form-control,
+        .btn-responsive .btn-outline-success {
+          font-size: 0.875rem; /* Tamanho da fonte menor para dispositivos móveis */
+          padding: 0.25rem 0.5rem; /* Menor padding para dispositivos móveis */
+      }
+
+
+      .btn-responsive input {
+        margin-bottom: 0.5rem; /* Espaço entre o input e o botão em dispositivos móveis */
+      }
+
+      .cellu {
+        margin-top: 30px;
+      }
+
+
+      .dropdown-menu {
+        font-size: 14px;
+      }
+
+      .user-profile .username {
+        font-size: 14px;
+      }
+
+      .container {
+        margin-top:80px;
+        transition: margin-left 0.3s ease; /* Transição suave para margin-left */
+      }
+
+    }
