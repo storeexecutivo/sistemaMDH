@@ -154,7 +154,7 @@ typing_extensions==4.8.0
 tzdata==2023.4
 tzlocal==5.2
 uritools==4.0.2
-urllib3==2.1.0
+urllib3>=1.26.5,<2
 URLObject==2.4.3
 validators==0.28.0
 vine==5.1.0
