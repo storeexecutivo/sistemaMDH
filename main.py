@@ -1204,7 +1204,7 @@ def upload_image_to_hosting_service(file_path):
     with open(file_path, "rb") as file:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
-            params={"key": "bc82e67936f541cc88311ce500bde68b"},
+            params={"key": "1c2f905e5c6254887b5f86346982b618"},
             files={"image": file}
         )
     response_data = response.json()
