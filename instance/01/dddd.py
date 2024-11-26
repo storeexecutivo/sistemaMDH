@@ -1,0 +1,14 @@
+requests==2.31.0
+facebook-sdk==3.1.0
+Flask==3.0.0
+gunicorn==21.2.0
+Flask-SQLAlchemy==3.0.3
+Werkzeug==3.0.0
+Flask-SocketIO==5.3.5
+APScheduler==3.9.1
+authlib==1.2.1
+python-dotenv==1.0.0
+plotly==5.9.0
+pytz==2023.3
+WTForms==3.0.1
+bcrypt==4.0.1
