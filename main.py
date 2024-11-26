@@ -1199,19 +1199,19 @@ def post_form():
 
 def upload_image_to_hosting_service(file_path):
     """Envia a imagem para um serviço de hospedagem e retorna a URL."""
-    # Substitua por um serviço de hospedagem real, como Cloudinary ou ImgBB
-    # Aqui está um exemplo com ImgBB:
     with open(file_path, "rb") as file:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
-            params={"key": "1c2f905e5c6254887b5f86346982b618"},
+            params={"key": "bc82e67936f541cc88311ce500bde68b"},
             files={"image": file}
         )
     response_data = response.json()
     if response.status_code == 200:
         return response_data["data"]["url"]
     else:
-        raise Exception("Erro ao enviar imagem para o ImgBB.")
+        print("Resposta do servidor:", response.text)  # Adiciona o log para entender o erro
+        raise Exception(f"Erro ao enviar imagem para o ImgBB. Status code: {response.status_code}")
+
 
 @app.route('/post_to_instagram', methods=['POST'])
 def post_to_instagram():
