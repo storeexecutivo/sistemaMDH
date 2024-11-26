@@ -1248,6 +1248,30 @@ def upload_image_to_hosting_service(file_path):
         # Trata erros de conexão ou tempo limite
         raise Exception(f"Erro de conexão ao enviar imagem: {str(e)}")
 
+import cloudinary
+
+# Configurar credenciais do Cloudinary
+cloudinary.config(
+    cloud_name="drk46wgl4",   # Substitua pelo seu Cloud Name
+    api_key="229312357363397",         # Substitua pela sua API Key
+    api_secret="2SxYgOfrEn7a-5Et8Ur57Vm-R5A"    # Substitua pelo seu API Secret
+)
+
+import cloudinary.uploader
+
+def upload_to_cloudinary(file_path):
+    """
+    Envia uma imagem para o Cloudinary e retorna a URL.
+    """
+    try:
+        response = cloudinary.uploader.upload(file_path)
+        return response["url"]  # Retorna a URL da imagem hospedada
+    except Exception as e:
+        raise Exception(f"Erro ao enviar para o Cloudinary: {str(e)}")
+
+
+
+
 
 @app.route('/post_to_instagram', methods=['POST'])
 def post_to_instagram():
@@ -1264,7 +1288,7 @@ def post_to_instagram():
         image_file.save(file_path)
 
         # Faz upload da imagem para o serviço de hospedagem
-        image_url = upload_image_to_hosting_service(file_path)
+        image_url = upload_to_cloudinary(file_path)
 
         # Passo 1: Criar container de mídia
         create_media_url = f"https://graph.facebook.com/v16.0/{INSTAGRAM_ACCOUNT_ID}/media"
