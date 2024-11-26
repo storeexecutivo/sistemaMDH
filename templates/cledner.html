@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Facebook Post Engagement</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Posts e Engajamentos</h1>
+    <div id="notifications"></div>
+
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('new_interaction', function(data) {
+            const notification = `
+                <div>
+                    <strong>Post:</strong> ${data.post_name}<br>
+                    <strong>Novos Likes:</strong> ${data.new_likes}<br>
+                    <strong>Novos Comentários:</strong> ${data.new_comments}<br>
+                    <strong>Novos Compartilhamentos:</strong> ${data.new_shares}<br>
+                </div><br>
+            `;
+            document.getElementById('notifications').insertAdjacentHTML('beforeend', notification);
+            alert("Nova interação detectada no post: " + data.post_name);
+        });
+    </script>
+</body>
+</html>

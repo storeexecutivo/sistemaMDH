@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary"><i class="bi bi-bullseye"></i> Gerenciamento de Campanhas</h2>
+        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#criarCampanhaModal">
+            <i class="bi bi-plus-circle"></i> Nova Campanha
+        </button>
+    </div>
+
+<!-- Modal -->
+
+    <!-- Modal de Criação -->
+    <div class="modal fade" id="criarCampanhaModal" tabindex="-1" aria-labelledby="criarCampanhaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="criarCampanhaModalLabel"><i class="bi bi-pencil-square"></i> Criar Nova Campanha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('criar_campanha') }}" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="form-label">Nome da Campanha</label>
+                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite o nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="objetivo" class="form-label">Objetivo</label>
+                                <select class="form-select" id="objetivo" name="objetivo" required>
+                                    <option value="" disabled selected>Escolha um objetivo</option>
+                                    <option value="OUTCOME_LEADS">Leads</option>
+                                    <option value="OUTCOME_SALES">Sales</option>
+                                    <option value="OUTCOME_ENGAGEMENT">Engagement</option>
+                                    <option value="OUTCOME_AWARENESS">Awareness</option>
+                                    <option value="OUTCOME_TRAFFIC">Traffic</option>
+                                    <option value="OUTCOME_APP_PROMOTION">App Promotion</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="post_id" class="form-label">Postagem Vinculada</label>
+                                <select class="form-select" name="post_id" id="post_id" required>
+                                    <option value="" selected disabled>Carregando posts...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="orcamento_diario" class="form-label">Orçamento Diário</label>
+                                <input type="number" class="form-control" id="orcamento_diario" name="orcamento_diario" value="1000" min="100" step="100" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="data_inicio" class="form-label">Data de Início</label>
+                                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="data_fim" class="form-label">Data de Fim</label>
+                                <input type="date" class="form-control" id="data_fim" name="data_fim">
+                            </div>
+                        </div>
+                          <div class="mb-3">
+        <label for="billing_event" class="form-label">Evento de Cobrança</label>
+        <select class="form-select" id="billing_event" name="billing_event" required>
+            <option value="IMPRESSIONS">Impressões</option>
+            <option value="CLICKS">Cliques</option>
+            <option value="LINK_CLICKS">Cliques em Links</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="optimization_goal" class="form-label">Objetivo de Otimização</label>
+        <select class="form-select" id="optimization_goal" name="optimization_goal" required>
+            <option value="REACH">Alcance</option>
+            <option value="IMPRESSIONS">Impressões</option>
+            <option value="LINK_CLICKS">Cliques em Links</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="targeting" class="form-label">Segmentação (JSON)</label>
+        <textarea class="form-control" id="targeting" name="targeting" rows="5" required>
+{
+    "geo_locations": {"countries": ["MZ"]},
+    "age_min": 18,
+    "age_max": 65
+}
+        </textarea>
+        <div class="form-text">Insira a segmentação no formato JSON.</div>
+    </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Criar Campanha</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const postSelect = document.getElementById('post_id');
+
+    // Fetch posts from the server
+    fetch('/postsss')
+        .then(response => response.json())
+        .then(data => {
+            // Clear existing options
+            postSelect.innerHTML = '<option value="" selected disabled>Selecione um post...</option>';
+
+            if (data.error) {
+                postSelect.innerHTML = `<option value="" disabled>Erro ao carregar posts: ${data.error}</option>`;
+                return;
+            }
+
+            // Populate options with posts
+            data.forEach(post => {
+                const messagePreview = post.message ? post.message.slice(0, 50) : '(Sem texto)';
+                const option = document.createElement('option');
+                option.value = post.id;
+                option.textContent = `${messagePreview} (${post.created_time})`;
+                postSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            postSelect.innerHTML = `<option value="" disabled>Erro ao carregar posts: ${error}</option>`;
+        });
+});
+
+</script>
+
+    <!-- Listagem de campanhas -->
+      <!-- Listagem de Campanhas -->
+    <div class="list-group shadow-lg">
+        {% for campanha in campanhas %}
+        <div class="list-group-item p-4 rounded mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="text-dark">{{ campanha.name }}</h5>
+                    <p class="mb-0 text-muted">ID: {{ campanha.id }} | Status: <strong>{{ campanha.status }}</strong> | Objetivo: {{ campanha.objective }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <!-- Botão de editar -->
+                    <button class="btn btn-outline-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
+                        data-id="{{ campanha.id }}" data-nome="{{ campanha.name }}" data-status="{{ campanha.status }}">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </button>
+                    <!-- Botão de excluir -->
+                    <form action="{{ url_for('excluir_campanha', campanha_id=campanha.id) }}" method="post">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- Modal de Edição -->
+<!-- Modal de Edição -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg">
+            <form id="editForm" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editModalLabel"><i class="bi bi-pencil"></i> Editar Campanha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editCampanhaId">
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="editNome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStatus" class="form-label">Status</label>
+                        <select class="form-select" id="editStatus">
+                            <option value="ACTIVE">Ativa</option>
+                            <option value="PAUSED">Pausada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para manipulação do modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editForm = document.getElementById('editForm');
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const campanhaId = button.getAttribute('data-id');
+                const nome = button.getAttribute('data-nome');
+                const status = button.getAttribute('data-status');
+
+                document.getElementById('editCampanhaId').value = campanhaId;
+                document.getElementById('editNome').value = nome;
+                document.getElementById('editStatus').value = status;
+            });
+        });
+
+        editForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const campanhaId = document.getElementById('editCampanhaId').value;
+            const nome = document.getElementById('editNome').value;
+            const status = document.getElementById('editStatus').value;
+            
+            fetch(`/campanhas/editar/${campanhaId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `nome=${nome}&status=${status}`
+            }).then(() => location.reload());
+        });
+    });
+</script>
+
+{% endblock %}
+

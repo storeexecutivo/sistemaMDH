@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Campaign Report: {{ campaign.name }}</h1>
+        <p><strong>Description:</strong> {{ campaign.description }}</p>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Post Name</th>
+                    <th>Likes</th>
+                    <th>Comments</th>
+                    <th>Shares</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in campaign.posts %}
+                <tr>
+                    <td>{{ post.name }}</td>
+                    <td>{{ post.likes }}</td>
+                    <td>{{ post.comments }}</td>
+                    <td>{{ post.shares }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3 class="mt-4">Aggregate Metrics</h3>
+        <ul>
+            <li><strong>Total Likes:</strong> {{ total_likes }}</li>
+            <li><strong>Total Comments:</strong> {{ total_comments }}</li>
+            <li><strong>Total Shares:</strong> {{ total_shares }}</li>
+        </ul>
+        <a href="/campaigns" class="btn btn-secondary">Back to Campaigns</a>
+    </div>
+</body>
+</html>

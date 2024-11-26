@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Digital Hub - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+  <style>
+    /* Reset básico */
+  * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+  }
+  
+  body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Roboto', sans-serif;
+  }
+  
+  /* Estilização principal do container */
+  .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 3rem 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+  }
+  
+  .login-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+  }
+  
+  /* Logotipo e cabeçalho */
+  .login-logo {
+      width: 60px;
+      margin-bottom: 1rem;
+  }
+  
+  .login-header h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+  }
+  
+  .login-header p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 2rem;
+  }
+  
+  /* Campos de entrada */
+  .login-input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #f3f3f3;
+      color: #333;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+  }
+  
+  .login-input::placeholder {
+      color: #999;
+  }
+  
+  .login-input:focus {
+      outline: none;
+      background-color: #fef9e7;
+      border: 1px solid #fdbb2d;
+  }
+  
+  /* Mensagem de erro */
+  .error-message {
+      color: #ff4d4d;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: rgba(255, 77, 77, 0.1);
+      font-weight: bold;
+  }
+  
+  /* Botão de login */
+  .login-button {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #fdbb2d, #ff7e5f);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease;
+  }
+  
+  .login-button:hover {
+      background: #ff7e5f;
+  }
+  
+  /* Link de esquecimento de senha */
+  .forgot-password {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #666;
+      cursor: pointer;
+      transition: color 0.3s ease;
+  }
+  
+  .forgot-password:hover {
+      color: #fdbb2d;
+  }
+  
+  /* Link para criar conta */
+  .register-link {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #666;
+  }
+  
+  .register-link .highlighted-link {
+      color: #fdbb2d;
+      font-weight: bold;
+      text-decoration: none;
+      transition: color 0.3s ease;
+  }
+  
+  .register-link .highlighted-link:hover {
+      color: #b21f1f;
+      text-decoration: underline;
+  }
+  
+  /* Estilo do botão para alternar visibilidade da senha */
+  .password-container {
+      position: relative;
+      width: 100%;
+  }
+  
+  .toggle-password-button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 0.85rem;
+      cursor: pointer;
+  }
+  
+  .toggle-password-button:hover {
+      color: #fdbb2d;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 480px) {
+      .login-container {
+          padding: 2rem 1rem;
+      }
+      .login-logo {
+          width: 50px;
+      }
+      .login-header h2 {
+          font-size: 1.5rem;
+      }
+      .login-input {
+          padding: 0.7rem;
+      }
+      .login-button {
+          padding: 0.7rem;
+      }
+  }
+
+  </style>
+<body>
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="margin-bottom: 10px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+    <div class="login-container">
+        <div class="login-content">
+            <div class="login-header">
+              
+                <h2>Marketing Digital Hub</h2>
+                <p>Conecte-se e potencialize sua estratégia de marketing.</p>
+            </div>
+            <form method="POST"  action="{{ url_for('login') }}" class="login-form">
+                <input
+                    type="nome"
+                    name="nome"
+                    placeholder="Nome"
+                    value="{{ request.form.get('nome', '') }}"
+                    class="login-input"
+                    required
+                />
+                <input
+                    type="senha"
+                    name="senha"
+                    placeholder="Senha"
+                    class="login-input"
+                    required
+                />
+                <button type="submit" class="login-button">Entrar</button>
+                {% if error_message %}
+                    <p class="error-message">{{ error_message }}</p>
+                {% endif %}
+            </form>
+           <a class="forgot-password" href="{{ url_for('esqueceu_senha') }}">Esqueceu a Senha?</a>
+            
+        </div>
+    </div>
+</body>
+</html>

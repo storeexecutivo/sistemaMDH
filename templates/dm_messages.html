@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mensagens do Messenger</title>
+</head>
+<body>
+    <h1>Mensagens Recebidas no Messenger</h1>
+    <ul>
+        {% for message in messages %}
+            <li>
+                <strong>De:</strong> {{ message.sender }}<br>
+                <strong>Mensagem:</strong> {{ message.message }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

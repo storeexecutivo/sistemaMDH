@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electro Zone - Dashboard</title>
+    <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+     <style>
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        a:hover {
+            text-decoration: none; /* Remove decoração ao hover */
+        }
+
+        /* Header Styling */
+        header {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+        }
+        header h1 {
+            font-size: 1.5rem;
+        }
+        header nav a {
+            color: white;
+            font-weight: 600;
+            margin-left: 20px;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #6a11cb, #2575fc);
+            color: white;
+            position: fixed;
+        }
+        .sidebar .nav-link {
+            color: white;
+            font-size: 1rem;
+            padding: 10px;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+         .cledner a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 55px;
+        }
+
+        /* Estilo geral para o menu dropdown */
+        .custom-dropdown {
+            background-color: #f8f9fa; /* Fundo claro */
+            transition: all 0.3s ease; /* Animação suave */
+        }
+
+        /* Itens do menu */
+        .custom-dropdown .dropdown-item {
+            padding: 12px 20px; /* Espaçamento confortável */
+            font-size: 16px; /* Tamanho maior para boa leitura */
+            color: #212529; /* Cor do texto */
+            display: flex; /* Layout flexível */
+            align-items: center; /* Alinha ícone e texto */
+            gap: 10px; /* Espaço entre ícone e texto */
+            transition: background-color 0.2s ease, color 0.2s ease; /* Transições suaves */
+        }
+
+        /* Hover sobre os itens */
+        .custom-dropdown .dropdown-item:hover {
+            background-color: #007bff; /* Fundo azul */
+            color: #fff; /* Texto branco */
+        }
+
+        /* Ícones */
+        .custom-dropdown .dropdown-item i {
+            font-size: 18px; /* Ícones maiores */
+            color: #6c757d; /* Cor inicial do ícone */
+            transition: color 0.2s ease; /* Animação na cor do ícone */
+        }
+
+        /* Ícones no hover */
+        .custom-dropdown .dropdown-item:hover i {
+            color: #fff; /* Ícone branco no hover */
+        }
+
+        /* Borda arredondada do menu */
+        .custom-dropdown {
+            border-radius: 12px; /* Canto arredondado */
+        }
+
+        /* Sombra para destacar o menu */
+        .custom-dropdown {
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra elegante */
+        }
+
+
+        /* Main Content Styling */
+        main {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        /* Floating Button Styling */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        #main-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            border: none;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        #main-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sub Button Animations */
+        .sub-btns {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .sub-btns.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .nav-link:hover {
+            text-decoration: none; /* Remove decoração ao hover */
+        }
+
+        .cledner:hover a{
+            text-decoration: none; /* Remove decoração ao hover */
+        }
+
+        .cledner a{
+            text-decoration: none; /* Remove decoração ao hover */
+        }
+
+
+        .sub-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            background-color: white;
+            border: 2px solid #6a11cb;
+            color: #6a11cb;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .sub-btn:hover {
+            background-color: #6a11cb;
+            color: white;
+        }
+
+        /* Footer Styling */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        /* Modal Styling */
+        .modal-header {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+        }
+        .modal-content {
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        .btn-gradient {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            border: none;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(to right, #feb47b, #ff7e5f);
+        }
+
+        .container.mt-5 {
+            height: 595px;
+            overflow-y: auto; /* Caso o conteúdo ultrapasse a altura */
+        }
+   
+
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+   
+    <header class="py-3 bg-dark">
+    <div class="container d-flex align-items-center justify-content-between">
+        <h1><i class="bi bi-lightning-fill"></i> Electro Zone</h1>
+        <nav class="cledner">
+            <a href="/" class="text-white mx-3">Home</a>
+             {% if current_user.is_authenticated and current_user.role == 'Admin' %}
+        <a href="/engagement_report" class="text-white mx-3">Análise</a>
+    {% endif %}
+            <a href="/scheduled_posts" class="text-white mx-3">Agendamentos</a>
+        </nav>
+        <!-- Ícone com Dropdown -->
+        <div class="dropdown">
+    <a
+        class="text-white d-flex align-items-center text-decoration-none dropdown-toggle"
+        href="#"
+        role="button"
+        id="userMenu"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+    >
+        <i class="bi bi-person-circle fs-4"></i>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+        <!-- Exibe o nome do usuário -->
+        <li class="dropdown-item-text fw-bold text-secondary">
+            {{ current_user.nome }}
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <!-- Opções -->
+         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">Perfil</a></li>
+        <li><a class="dropdown-item" href="/usuarios/redefinir-senha">Alterar Senha</a></li>
+        <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+    </ul>
+</div>
+<!-- Modal de Perfil -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="profileModalLabel"><i class="bi bi-person-circle me-2"></i>Dados do Perfil</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if current_user.is_authenticated %}
+          <div class="row">
+            <div class="col-12 text-center mb-4">
+              <img src="https://via.placeholder.com/120" class="rounded-circle shadow-sm" alt="Foto de Perfil">
+              <h4 class="mt-3">{{ current_user.nome }}</h4>
+              <p class="text-muted">{{ current_user.role }}</p>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="profileName" class="text-black form-label fw-bold">Nome</label>
+                <input type="text" class="form-control border-primary shadow-sm" id="profileName" value="{{ current_user.nome }}" readonly>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="profileEmail" class="text-black form-label fw-bold">Email</label>
+                <input type="email" class="form-control border-primary shadow-sm" id="profileEmail" value="{{ current_user.email }}" readonly>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mb-3">
+                <label for="profileRole" class="text-black form-label fw-bold">Função</label>
+                <input type="text" class="form-control border-primary shadow-sm" id="profileRole" value="{{ current_user.role }}" readonly>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-warning text-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> Usuário não autenticado.
+          </div>
+        {% endif %}
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+</header>
+
+    <div class="d-flex">
+        <aside class="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/" class="nav-link"><i class="bi bi-house-fill"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/posts" class="nav-link"><i class="bi bi-file-earmark-text-fill"></i> Posts</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/get_messages" class="nav-link"><i class="bi bi-chat-dots-fill"></i> Mensagens</a>
+                </li>
+                 {% if current_user.is_authenticated and current_user.role == 'Admin' %}
+          <li class="nav-item">
+                    <a href="/campanhas" class="nav-link"><i class="bi bi-megaphone-fill"></i> Campanhas</a>
+                </li>
+    {% endif %}
+              {% if current_user.is_authenticated and current_user.role == 'Admin' %}
+           <li class="nav-item">
+                    <a href="/engagement_report" class="nav-link"><i class="bi bi-graph-up-arrow"></i> Relatórios</a>
+                </li>
+    {% endif %}
+                {% if current_user.is_authenticated and current_user.role == 'Admin' %}
+                 <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" id="configDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill"></i> Configurações
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 custom-dropdown" aria-labelledby="configDropdown">
+                        <li><a href="/usuarios" class="dropdown-item"><i class="bi bi-person-fill"></i>Usuários</a></li>
+                        <li><a href="/logs" class="dropdown-item"><i class="bi bi-shield-lock-fill"></i> Privacidade</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+        </aside>
+        <main class="container.mt-5 flex-grow-1">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+
+     <!-- Botão Flutuante -->
+    <div class="floating-btn">
+        <button id="main-btn" class="btn btn-primary shadow-lg rounded-circle">
+            <i class="bi bi-pen-fill fs-4"></i>
+        </button>
+        <div id="sub-btns" class="sub-btns">
+            <button id="new-post-btn" class="btn sub-btn btn-light rounded-circle shadow" title="Novo Post">
+                <i class="bi bi-plus-circle-fill"></i>
+            </button>
+            <button id="schedule-Post-btn" class="btn sub-btn btn-light rounded-circle shadow" title="Agendar Post">
+                <i class="bi bi-calendar-plus-fill"></i>
+            </button>
+
+<script>
+    document.getElementById('messages-btn').addEventListener('click', function () {
+        window.location.href = "{{ url_for('get_messages') }}";
+    });
+</script>
+
+<script>
+    document.getElementById('messages-btn').addEventListener('click', function() {
+        fetch('/get_messages', {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Here, you can process the data and update your page.
+            if (data.unique_senders) {
+                // Example: Log the senders
+                console.log(data.unique_senders);
+
+                // You can then display the unique_senders in the UI as needed.
+                let messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';  // Clear any existing content
+
+                data.unique_senders.forEach(sender => {
+                    let senderDiv = document.createElement('div');
+                    senderDiv.classList.add('sender');
+                    senderDiv.innerHTML = `
+                        <img src="${sender.picture}" alt="${sender.name}" class="sender-avatar">
+                        <p>${sender.name}</p>
+                    `;
+                    messagesContainer.appendChild(senderDiv);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
+        });
+    });
+</script>
+
+
+        </div>
+    </div>
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div id="flash-messages" style="position: fixed; top: 20px; right: 20px; z-index: 1050;">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="margin-bottom: 10px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<script>
+    // Desaparecer mensagens após 3 segundos
+    setTimeout(() => {
+        const flashMessages = document.getElementById('flash-messages');
+        if (flashMessages) {
+            flashMessages.style.transition = "opacity 0.5s ease-out";
+            flashMessages.style.opacity = "0";
+            setTimeout(() => flashMessages.remove(), 500); // Remove o elemento após a transição
+        }
+    }, 3000);
+</script>
+
+<!-- Modal Agendar Post -->
+<div class="modal fade" id="schedulePostModal" tabindex="-1" aria-labelledby="schedulePostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header py-4" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                <h5 class="modal-title text-white fw-bold" id="schedulePostModalLabel">
+                    <i class="bi bi-calendar-plus me-2"></i> Agendar Novo Post
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body px-4 py-5">
+                <form action="/schedule_post" method="POST">
+                    <div class="mb-4">
+                        <label for="post_name" class="form-label fw-semibold">Nome do Post</label>
+                        <input type="text" name="post_name" class="form-control form-control-lg rounded-3" placeholder="Digite o nome do post" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="message" class="form-label fw-semibold">Mensagem</label>
+                        <textarea name="message" class="form-control form-control-lg rounded-3" placeholder="Digite sua mensagem" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="scheduled_time" class="form-label fw-semibold">Data e Hora de Publicação</label>
+                        <input type="datetime-local" name="scheduled_time" class="form-control form-control-lg rounded-3" required>
+                    </div>
+                    <button type="submit" class="btn btn-gradient w-100 py-3 fw-bold rounded-3">Agendar Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.0/dist/emoji-button.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.0/dist/emoji-button.min.js"></script>
+
+    
+    
+    <!-- Modal de Novo Post Melhorado -->
+  <!-- Modal de Novo Post Melhorado -->
+<div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header py-4" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                <h5 class="modal-title text-white fw-bold" id="newPostModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i> Criar Novo Post
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body px-4 py-5">
+                <form id="postForm" action="/post_to_both" method="post" enctype="multipart/form-data">
+                    <!-- Campo de Título -->
+                    <div class="mb-4">
+                        <label for="postName" class="form-label fw-semibold">
+                            <i class="bi bi-tag me-2"></i> Título do Post
+                        </label>
+                        <input type="text" class="form-control form-control-lg rounded-3"
+                               id="postName" name="post_name" placeholder="Digite o título do post" required>
+                    </div>
+
+                    <!-- Campo de Mensagem -->
+                    <div class="mb-4">
+                        <label for="messageContent" class="form-label fw-semibold">
+                            <i class="bi bi-chat-left-text me-2"></i> Mensagem
+                        </label>
+                        <textarea class="form-control form-control-lg rounded-3" id="messageContent"
+                                  name="caption" placeholder="Digite sua mensagem" rows="5" required></textarea>
+                    </div>
+
+                    <!-- Upload de Imagem -->
+                    <div class="mb-4">
+                        <label for="file" class="form-label fw-semibold">
+                            <i class="bi bi-image me-2"></i> Imagem (Opcional)
+                        </label>
+                        <input type="file" class="form-control form-control-lg rounded-3" id="file" name="file" accept="image/*" onchange="previewImage(event)">
+                        <small class="form-text text-muted">Formatos permitidos: JPG, PNG, GIF</small>
+                        <div class="mt-3">
+                            <img id="imagePreview" src="#" alt="Pré-visualização" class="img-fluid rounded d-none" style="max-height: 200px;">
+                        </div>
+                    </div>
+
+                    <!-- Seleção de Redes Sociais -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-share me-2"></i> Onde deseja postar?
+                        </label>
+                        <div class="d-flex gap-3">
+    <!-- Instagram -->
+    <div>
+        <input type="checkbox" class="btn-check" id="instagramCheck" name="platforms" value="instagram" autocomplete="off">
+        <label class="btn btn-outline-primary btn-lg" for="instagramCheck">
+            <i class="bi bi-instagram me-2"></i> Instagram
+        </label>
+    </div>
+
+    <!-- Facebook -->
+    <div>
+        <input type="checkbox" class="btn-check" id="facebookCheck" name="platforms" value="facebook" autocomplete="off">
+        <label class="btn btn-outline-primary btn-lg" for="facebookCheck">
+            <i class="bi bi-facebook me-2"></i> Facebook
+        </label>
+    </div>
+
+    <!-- WhatsApp -->
+    <div>
+        <input type="checkbox" class="btn-check" id="whatsappCheck" name="platforms" value="whatsapp" autocomplete="off">
+        <label class="btn btn-outline-success btn-lg" for="whatsappCheck">
+            <i class="bi bi-whatsapp me-2"></i> WhatsApp
+        </label>
+    </div>
+</div>
+
+                        <small class="form-text text-muted">Selecione uma ou mais plataformas</small>
+                    </div>
+
+                    <!-- Botão de Submissão -->
+                    <button type="submit" id="postButton" class="btn btn-gradient w-100 py-3 fw-bold rounded-3">
+                        <span id="postButtonText">Postar</span>
+                        <span id="postSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pré-visualização da imagem
+    function previewImage(event) {
+        const imagePreview = document.getElementById('imagePreview');
+        const file = event.target.files[0];
+        if (file) {
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.classList.remove('d-none');
+        } else {
+            imagePreview.src = '#';
+            imagePreview.classList.add('d-none');
+        }
+    }
+
+    // Alterar o botão durante o envio
+    const postForm = document.getElementById('postForm');
+    const postButton = document.getElementById('postButton');
+    const postButtonText = document.getElementById('postButtonText');
+    const postSpinner = document.getElementById('postSpinner');
+
+    postForm.addEventListener('submit', () => {
+        postButtonText.textContent = 'Postando...';
+        postSpinner.classList.remove('d-none');
+    });
+</script>
+<script>
+    function showToast(message, type) {
+    const toastHTML = `
+        <div class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>`;
+    document.body.insertAdjacentHTML('beforeend', toastHTML);
+    const toast = new bootstrap.Toast(document.querySelector('.toast'));
+    toast.show();
+}
+</script>
+<div id="loadingSpinner" class="spinner-border text-light d-none" role="status">
+    <span class="visually-hidden">Loading...</span>
+</div>
+
+    <script>
+    // Função para verificar se o formulário inclui uma imagem
+    document.getElementById('postForm').onsubmit = function (e) {
+        var fileInput = document.getElementById('file');
+        var form = e.target;
+
+        // Verifica se há um arquivo
+        if (fileInput.files.length > 0) {
+            // Se tiver imagem, mudar a ação do formulário para a rota de post_photo
+            form.action = '/post_to_both';
+        } else {
+            // Caso contrário, deixar a ação padrão para post_message
+            form.action = '/post_message';
+        }
+    };
+</script>
+
+
+
+    <!-- Script para Botão Flutuante e Modal -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainBtn = document.getElementById('main-btn');
+        const subBtns = document.getElementById('sub-btns');
+        const newPostBtn = document.getElementById('new-post-btn');
+        const schedulePostbtn=document.getElementById('schedule-Post-btn')
+        const newPostModal = new bootstrap.Modal(document.getElementById('newPostModal'));
+        const schedulePostModal = new bootstrap.Modal(document.getElementById('schedulePostModal'));
+
+        // Toggle dos Sub-Botões
+        mainBtn.addEventListener('click', () => {
+            subBtns.classList.toggle('open');
+        });
+    
+        // Abrir Modal de Novo Post
+        newPostBtn.addEventListener('click', () => {
+            newPostModal.show();
+        });
+
+        // Abrir Modal de Agendar Post quando o botão flutuante for clicado
+        schedulePostbtn.addEventListener('click', function() {
+            schedulePostModal.show();
+        });
+        
+    });
+    </script>
+
+    
+    <footer class="bg-dark text-white text-center py-3">
+        <p>© 2024 Electro Zone. Todos os direitos reservados.</p>
+    </footer>
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

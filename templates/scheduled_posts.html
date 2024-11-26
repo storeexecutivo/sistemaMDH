@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .container {
+    font-family: 'Roboto', sans-serif;
+    }
+    
+    h1 {
+        font-weight: bold;
+    }
+    
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table th {
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+        border-radius: 12px;
+    }
+
+</style>
+<div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">Posts Agendados</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nome do Post</th>
+                    <th>Mensagem</th>
+                    <th>Data de Agendamento</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td>{{ post.name }}</td>
+                    <td>{{ post.message }}</td>
+                    <td>{{ post.scheduled_time.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        {% if post.status == "PENDING" %}
+                        <span class="badge bg-warning text-dark">Pendente</span>
+                        {% elif post.status == "POSTED" %}
+                        <span class="badge bg-success">Publicado</span>
+                        {% elif post.status == "FAILED" %}
+                        <span class="badge bg-danger">Falhou</span>
+                        {% elif post.status == "CANCELLED" %}
+                        <span class="badge bg-secondary">Cancelado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                data-bs-target="#editModal" 
+                                data-id="{{ post.id }}" 
+                                data-name="{{ post.name }}" 
+                                data-message="{{ post.message }}" 
+                                data-scheduled_time="{{ post.scheduled_time.strftime('%Y-%m-%dT%H:%M') }}">
+                            Editar
+                        </button>
+                        {% if post.status != "CANCELLED" %}
+                        <a href="{{ url_for('cancel_post', post_id=post.id) }}" class="btn btn-sm btn-danger">Cancelar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Nenhum post agendado encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editForm" method="post" action="edit_posts">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="post_id" name="post_id">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome do Post</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Mensagem</label>
+                        <textarea id="message" name="message" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="scheduled_time" class="form-label">Data de Agendamento</label>
+                        <input type="datetime-local" id="scheduled_time" name="scheduled_time" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const message = button.getAttribute('data-message');
+        const scheduledTime = button.getAttribute('data-scheduled_time');
+
+        const modal = this;
+        modal.querySelector('#post_id').value = id;
+        modal.querySelector('#name').value = name;
+        modal.querySelector('#message').value = message;
+        modal.querySelector('#scheduled_time').value = scheduledTime;
+    });
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(to right, #2575fc, #6a11cb);
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #eef1f7;
+        transition: background-color 0.3s;
+    }
+
+    .table-dark th {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: white;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: white;
+    }
+
+    .btn-gradient {
+    background: linear-gradient(to right, #0d6efd, #6610f2);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(to right, #6610f2, #0d6efd);
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.3s;
+    }
+
+    .table-dark th {
+        background: linear-gradient(to right, #0d6efd, #6610f2);
+        color: white;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(to right, #0d6efd, #6610f2);
+        color: white;
+    }
+
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .error-message {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+
+
+
+</style>
+<div class="container mt-4">
+    <h2 class="text-center text-primary"><i class="bi bi-people-fill"></i> Gestão de Usuários</h2>
+
+    <!-- Botão para abrir o modal -->
+    <div class="text-end mb-3">
+        <button type="button" class="btn btn-gradient btn-lg" data-bs-toggle="modal" data-bs-target="#criarUsuarioModal">
+            <i class="bi bi-person-plus-fill"></i> Novo Usuário
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="criarUsuarioModal" tabindex="-1" aria-labelledby="criarUsuarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="criarUsuarioModalLabel"><i class="bi bi-person-badge-fill"></i> Novo Usuário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('criar_usuario') }}" method="post">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label"><i class="bi bi-person"></i> Nome</label>
+                            <input type="text" class="form-control shadow-sm" id="nome" name="nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label"><i class="bi bi-envelope-fill"></i> Email</label>
+                            <input type="email" class="form-control shadow-sm" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label"><i class="bi bi-briefcase-fill"></i> Role</label>
+                            <select class="form-select shadow-sm" id="role" name="role">
+                                <option value="Admin">Administrador</option>
+                                <option value="Moderador">Editor</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-gradient shadow-sm">Criar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <table class="table table-hover shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th><i class="bi bi-person"></i> Nome</th>
+                <th><i class="bi bi-envelope"></i> Email</th>
+                <th><i class="bi bi-briefcase"></i> Role</th>
+                <th><i class="bi bi-circle-fill"></i> Status</th>
+                <th><i class="bi bi-gear-fill"></i> Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nome }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.role }}</td>
+                <td>
+                    <span class="badge {{ 'bg-success' if usuario.ativo else 'bg-danger' }}">
+                        {{ "Ativo" if usuario.ativo else "Inativo" }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{{ url_for('editar_usuario', id=usuario.id) }}" class="btn btn-warning btn-sm shadow-sm">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    <form action="{{ url_for('alterar_status_usuario', id=usuario.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-info btn-sm shadow-sm">
+                            <i class="bi {{ 'bi-toggle-on' if usuario.ativo else 'bi-toggle-off' }}"></i>
+                            {{ "Desativar" if usuario.ativo else "Ativar" }}
+                        </button>
+                    </form>
+                    <form action="{{ url_for('deletar_usuario', id=usuario.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm shadow-sm">
+                            <i class="bi bi-trash"></i> Deletar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const nomeInput = document.getElementById("nome");
+        const emailInput = document.getElementById("email");
+        const roleSelect = document.getElementById("role");
+
+        const validateNome = () => {
+            const nome = nomeInput.value.trim(); // Remove espaços extras no início e no final
+            const nomeRegex = /^[a-zA-ZÀ-ÿ\s]+$/; // Permite apenas letras, acentos e espaços
+
+            if (nome === "") {
+                showError(nomeInput, "O nome não pode estar vazio ou ser apenas espaços.");
+                return false;
+            }
+
+            if (!nomeRegex.test(nome)) {
+                showError(nomeInput, "O nome deve conter apenas letras e espaços.");
+                return false;
+            }
+
+            if (nome.length < 3) {
+                showError(nomeInput, "O nome deve ter pelo menos 3 caracteres.");
+                return false;
+            }
+
+            hideError(nomeInput);
+            return true;
+        };
+
+
+        const validateEmail = () => {
+            const email = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError(emailInput, "Por favor, insira um email válido.");
+                return false;
+            }
+            hideError(emailInput);
+            return true;
+        };
+
+        const validateRole = () => {
+            const role = roleSelect.value;
+            if (!role) {
+                showError(roleSelect, "Por favor, selecione uma função válida.");
+                return false;
+            }
+            hideError(roleSelect);
+            return true;
+        };
+
+        const showError = (element, message) => {
+            const errorElement = element.nextElementSibling;
+            if (errorElement && errorElement.classList.contains("error-message")) {
+                errorElement.textContent = message;
+            } else {
+                const error = document.createElement("small");
+                error.classList.add("error-message", "text-danger");
+                error.textContent = message;
+                element.parentElement.appendChild(error);
+            }
+            element.classList.add("is-invalid");
+        };
+
+        const hideError = (element) => {
+            const errorElement = element.nextElementSibling;
+            if (errorElement && errorElement.classList.contains("error-message")) {
+                errorElement.remove();
+            }
+            element.classList.remove("is-invalid");
+        };
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault(); // Impede o envio se houver erros
+            const isNomeValid = validateNome();
+            const isEmailValid = validateEmail();
+            const isRoleValid = validateRole();
+
+            if (isNomeValid && isEmailValid && isRoleValid) {
+                form.submit(); // Submete o formulário se tudo for válido
+            }
+        });
+
+        // Eventos de validação ao vivo
+        nomeInput.addEventListener("input", validateNome);
+        emailInput.addEventListener("input", validateEmail);
+        roleSelect.addEventListener("change", validateRole);
+    });
+
+</script>
+{% endblock %}
+

@@ -1,0 +1,726 @@
+from flask import Flask, render_template, request, jsonify, flash,redirect, url_for
+import facebook as fb
+import requests
+from flask import Flask, render_template, request, jsonify
+import facebook as fb
+import requests
+import os
+import pytz
+from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+
+
+# Configurações
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# Configurações do Flask e SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///facebook_posts.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Verifique se a pasta de upload existe, se não, crie
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+db = SQLAlchemy(app)
+
+app.secret_key = '701517828f08f86f2fcba2e79ed9583f'
+
+# Token de Acesso da API do Facebook
+AD_ACCOUNT_ID = 'act_1772358199633718'
+INSTAGRAM_ACCOUNT_ID = '17841465681073010'
+PAGE_ID= '101777818499902'
+#ACCESS_TOKEN = "EAA6jGHZB8lvkBOZC4XhpotHzfuuWT9OJ4gka0C3Fi5n925ORE32VLZAyCNMP5ifymwy0LzQQZBc6cNyYRbaJdvNTi2TZAgHSn6zw43ecAAYQlzlmmhtvKAGbUvAjK7KspwNnSrbzqSR0FAPTQTtI0myl0SCE4TF7W854lCgWYtqnZBc4ZANC5rvikPz4KHFsgkZD"
+ACCESS_TOKEN = "EAA6jGHZB8lvkBO884CZCJgKehFbpVL6x0SbHgBrUZBGzoLZBkZA2Jc11I3VZBknyZBFMkPExvD4YToJnDZBOl6VKqTYNzEYvr8gnZCK98c3GZCtELK1R2zOeVJz6TdNqb7dYUDwMZCRwctsxgbd0RvmrMuSgXkG1s47EqrWkRjZAHIMWwIL5yghd9WuL4QiKnobwG0BqhJcZD"
+graph = fb.GraphAPI(ACCESS_TOKEN)
+
+# Modelo de Dados
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(150), nullable=False)
+    likes = db.Column(db.Integer, default=0)  # Adicione este campo
+    comments = db.Column(db.Integer, default=0)  # Adicione este campo
+    shares = db.Column(db.Integer, default=0)  # Adicione este campo
+
+
+    def __repr__(self):
+        return f'<Post {self.name}>'
+
+
+# Banco de dados (no arquivo principal)
+from datetime import datetime
+
+class ScheduledPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.String(100), unique=True, nullable=True)
+    name = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+    scheduled_time = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(20), default="PENDING")  # Status: PENDING, POSTED, FAILED
+
+    def __repr__(self):
+        return f'<ScheduledPost {self.name}>'
+
+
+
+from apscheduler.schedulers.background import BackgroundScheduler
+
+# Configuração do scheduler
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+
+from datetime import datetime
+
+@app.route('/cledner')
+def cledner():
+    posts = Post.query.all()
+    return render_template('index.html', posts=posts)
+
+def post_scheduled_posts():
+    with app.app_context():  # Configura o contexto do app
+        # Busca todos os posts que estão agendados para agora ou antes e não foram postados
+        now = datetime.now()
+        pending_posts = ScheduledPost.query.filter(
+            ScheduledPost.scheduled_time <= now,
+            ScheduledPost.status == "PENDING"
+        ).all()
+
+        for post in pending_posts:
+            try:
+                # Publicar no Facebook
+                response = graph.put_object("me", "feed", message=post.message)
+                post.post_id = response['id']
+                post.status = "POSTED"
+
+
+                # Armazenar os detalhes do post na tabela Post
+                new_post = Post(
+                    post_id=response['id'],
+                    name=post.name,  # Aqui, você pode ajustar o que será salvo como 'name'
+                    likes=0,  # Inicialmente sem likes
+                    comments=0,  # Inicialmente sem comentários
+                    shares=0  # Inicialmente sem compartilhamentos
+                )
+                db.session.add(new_post)
+            except Exception as e:
+                post.status = "FAILED"
+                print(f"Erro ao postar: {e}")
+            db.session.commit()
+
+
+# Executa a função a cada minuto
+scheduler.add_job(post_scheduled_posts, 'interval', minutes=1)
+
+@app.route('/schedule_post', methods=['GET', 'POST'])
+def schedule_post():
+    if request.method == 'POST':
+        message = request.form.get('message')
+        post_name = request.form.get('post_name')
+        scheduled_time_str = request.form.get('scheduled_time')
+
+        # Convertendo a data e hora fornecida para um objeto datetime
+        scheduled_time = datetime.strptime(scheduled_time_str, "%Y-%m-%dT%H:%M")
+
+        # Criar um novo post agendado
+        new_scheduled_post = ScheduledPost(name=post_name, message=message, scheduled_time=scheduled_time)
+        db.session.add(new_scheduled_post)
+        db.session.commit()
+
+        return jsonify({"message": "Post agendado com sucesso"}), 200
+
+    return render_template('schedule_post.html')
+
+@app.route('/scheduled_posts')
+def scheduled_posts():
+    posts = ScheduledPost.query.all()
+    return render_template('scheduled_posts.html', posts=posts)
+
+@app.route('/cancel_post/<int:post_id>', methods=['GET', 'POST'])
+def cancel_post(post_id):
+    post = ScheduledPost.query.get_or_404(post_id)
+    if post.status != "CANCELLED":
+        post.status = "CANCELLED"
+        db.session.commit()
+    return redirect(url_for('scheduled_posts'))
+
+@app.route('/edit_posts/<int:post_id>', methods=['GET', 'POST'])
+def edit_posts(post_id):
+    post = ScheduledPost.query.get_or_404(post_id)
+    if request.method == 'POST':
+        post.name = request.form['name']
+        post.message = request.form['message']
+        post.scheduled_time = datetime.strptime(request.form['scheduled_time'], '%Y-%m-%dT%H:%M')
+        db.session.commit()
+        return redirect(url_for('scheduled_posts'))
+    return render_template('scheduled_posts.html', post=post)
+
+
+
+# Página Inicialj
+import requests
+
+# Definindo a rota para o dashboard
+# Rota para o dashboard
+@app.route('/')
+def dashboard():
+    posts = Post.query.order_by(Post.id.desc()).limit(5).all()
+    scheduled_posts = ScheduledPost.query.filter(
+        ScheduledPost.scheduled_time >= datetime.utcnow(),
+        ScheduledPost.status == "PENDING"
+    ).order_by(ScheduledPost.scheduled_time.asc()).limit(5).all()
+
+    # Obtendo o número de seguidores da página
+    fan_count = 0
+    try:
+        url = f"https://graph.facebook.com/me?fields=fan_count&access_token={ACCESS_TOKEN}"
+        response = requests.get(url).json()
+        fan_count = response.get("fan_count", 0)
+    except Exception as e:
+        print("Erro ao obter o número de seguidores:", str(e))
+
+    recent_posts = [{
+        'name': post.name,
+        'message': post.post_id,
+        'likes': post.likes,
+        'comments': post.comments,
+        'shares': post.shares,
+    } for post in posts]
+
+    labels = [post.name for post in posts]
+    likes_data = [post.likes for post in posts]
+    comments_data = [post.comments for post in posts]
+    shares_data = [post.shares for post in posts]
+
+    return render_template(
+        'dashboard.html',
+        total_likes=sum([post.likes for post in posts]),
+        total_comments=sum([post.comments for post in posts]),
+        total_shares=sum([post.shares for post in posts]),
+        fan_count=fan_count,  # Número de seguidores
+        recent_posts=recent_posts,
+        labels=labels,
+        likes_data=likes_data,
+        scheduled_posts=scheduled_posts,
+        comments_data=comments_data
+    )
+
+# Rota para Postar Mensagem
+@app.route('/post_message', methods=['POST'])
+def post_message():
+    message = request.form.get('message')
+    post_name = request.form.get('post_name')
+    try:
+        # Postar mensagem no feed do Facebook
+        response = graph.put_object("me", "feed", message=message)
+        
+        # Armazenar o ID do post e o nome na base de dados
+        new_post = Post(post_id=response['id'], name=post_name)
+        db.session.add(new_post)
+        db.session.commit()
+
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Rota para Postar Foto
+# Função para verificar extensão permitida
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+from flask import url_for
+
+from flask import url_for, send_from_directory
+
+# Rota para Postar Foto com Nome do Post
+@app.route('/post_photo', methods=['POST'])
+def post_photo():
+    message = request.form.get('message')
+    post_name = request.form.get('post_name')
+    file = request.files.get('file')
+
+    if not file or file.filename == '':
+        return jsonify({"error": "Nenhum arquivo enviado"}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            with open(filepath, "rb") as image:
+                response = graph.put_photo(image, message=message)
+                post_id = response['post_id']
+                # Salvar nome e ID do post na base de dados
+                new_post = Post(post_id=post_id, name=post_name)
+                db.session.add(new_post)
+                db.session.commit()
+            os.remove(filepath)
+            return jsonify(response), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    
+    return jsonify({"error": "Arquivo não permitido"}), 400
+
+
+
+# Rota para Comentar em um Post
+@app.route('/comment_post', methods=['POST'])
+def comment_post():
+    post_id = request.form.get('post_id')
+    comment = request.form.get('comment')
+    try:
+        response = graph.put_object(post_id, "comments", message=comment)
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+# Rota para Obter Informações de um Post
+@app.route('/get_post', methods=['GET'])
+def get_post():
+    post_id = request.args.get('post_id')
+    try:
+        response = graph.get_object(post_id)
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Rota para Obter o Número de Curtidas da Página
+@app.route('/get_fan_count', methods=['GET'])
+def get_fan_count():
+    try:
+        url = f"https://graph.facebook.com/me?fields=fan_count&access_token={ACCESS_TOKEN}"
+        response = requests.get(url).json()
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+
+def fetch_engagement_metrics(post_id):
+    try:
+        metrics = graph.get_object(id=post_id, fields='likes.summary(true),comments.summary(true),shares')
+        likes = metrics['likes']['summary']['total_count']
+        comments = metrics['comments']['summary']['total_count']
+        shares = metrics.get('shares', {}).get('count', 0)
+        return likes, comments, shares
+    except Exception as e:
+        print(f"Erro ao buscar métricas: {e}")
+        return 0, 0, 0
+
+def update_post_metrics():
+    with app.app_context():
+        posts = Post.query.all()
+        for post in posts:
+            likes, comments, shares = fetch_engagement_metrics(post.post_id)
+            post.likes = likes
+            post.comments = comments
+            post.shares = shares
+        db.session.commit()
+
+# Agendar a atualização a cada 10 minutos
+scheduler.add_job(update_post_metrics, 'interval', minutes=0.2)
+
+@app.route('/engagement_report')
+def engagement_report():
+    # Obtenha todos os posts do banco de dados
+    posts = Post.query.order_by(Post.likes.desc()).limit(10).all()
+
+    # Limpando dados e garantindo que sejam números inteiros
+    post_data = []
+    for post in posts:
+        likes = post.likes if post.likes is not None else 0
+        comments = post.comments if post.comments is not None else 0
+        shares = post.shares if post.shares is not None else 0
+        
+        # Adicionando ao array para passar ao template
+        post_data.append({
+            'name': post.name,
+            'likes': likes,
+            'comments': comments,
+            'shares': shares
+        })
+    
+    # Renderiza o template com a lista corrigida
+    return render_template('engagement_report.html', posts=post_data)
+
+
+
+
+
+
+@app.route('/select_post_comments', methods=['GET', 'POST'])
+def select_post_comments():
+    if request.method == 'POST':
+        # Obtenha o ID do post selecionado
+        post_id = request.form.get('post_id')
+        return view_comments(post_id=post_id)
+    
+    # Se for uma requisição GET, exiba a lista de posts
+    posts = Post.query.all()
+    return render_template('select_post.html', posts=posts)
+
+
+
+@app.route('/view_comments', methods=['GET'])
+def view_comments(post_id=None):
+    if not post_id:
+        post_id = request.args.get('post_id')
+    try:
+        comments_data = graph.get_connections(post_id, 'comments')
+        comments = comments_data['data']
+        return render_template('render_comments.html', comments=comments, post_id=post_id)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/reply_comments', methods=['POST'])
+def reply_comments():
+    comment_id = request.form.get('comment_id')
+    reply_message = request.form.get('reply_message')
+    try:
+        response = graph.put_object(comment_id, "comments", message=reply_message)
+        return jsonify({"message": "Comentário respondido com sucesso!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Define perguntas frequentes e respostas automáticas
+FAQ_ANSWERS = {
+    "qual é o horário de atendimento?": "Nosso horário de atendimento é das 9h às 18h, de segunda a sexta.",
+    "como posso entrar em contato?": "Você pode entrar em contato conosco pelo telefone (XX) XXXX-XXXX ou por mensagem direta.",
+    "onde vocês estão localizados?": "Estamos localizados em [Endereço da Empresa]."
+}
+
+def auto_reply(comment_text):
+    # Verifica se o comentário corresponde a uma pergunta frequente
+    for question, answer in FAQ_ANSWERS.items():
+        if question in comment_text.lower():
+            return answer
+    return None
+
+def auto_reply_to_faqs():
+    with app.app_context():
+        posts = Post.query.all()
+        for post in posts:
+            try:
+                comments_data = graph.get_connections(post.post_id, 'comments')
+                comments = comments_data['data']
+                for comment in comments:
+                    auto_reply_message = auto_reply(comment['message'])
+                    if auto_reply_message:
+                        graph.put_object(comment['id'], "comments", message=auto_reply_message)
+            except Exception as e:
+                print(f"Erro ao responder automaticamente: {e}")
+
+# Agendar a verificação e resposta automática a cada 5 minutos
+scheduler.add_job(auto_reply_to_faqs, 'interval', minutes=1)
+
+@app.route('/get_messages_by_sender', methods=['GET'])
+def get_messages_by_sender():
+    sender_id = request.args.get('sender_id')
+    if not sender_id:
+        return jsonify({"error": "Sender ID is required"}), 400
+
+    try:
+        # Aqui filtramos apenas as mensagens do remetente específico
+        url = f"https://graph.facebook.com/v14.0/me/conversations?fields=messages{{message,created_time,from}}&access_token={ACCESS_TOKEN}"
+        response = requests.get(url).json()
+
+        messages = [
+            {
+                "text": msg.get("message", ""),
+                "created_time": msg.get("created_time", "Desconhecido"),
+            }
+            for conversation in response.get('data', [])
+            for msg in conversation.get('messages', {}).get('data', [])
+            if msg.get("from", {}).get("id") == sender_id
+        ]
+
+        return jsonify({"messages": messages})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+# Rota para exibir mensagens
+@app.route('/get_messages', methods=['GET'])
+def get_messages():
+    try:
+        # Chamada à API
+        url = f"https://graph.facebook.com/v14.0/me/conversations?fields=participants,messages{{id,from}}&access_token={ACCESS_TOKEN}"
+        response = requests.get(url).json()
+
+        unique_senders = {}
+        for conversation in response.get('data', []):
+            participants = conversation.get('participants', {}).get('data', [])
+            for participant in participants:
+                sender_id = participant.get('id')
+                if sender_id not in unique_senders:
+                    unique_senders[sender_id] = {
+                        'id': sender_id,
+                        'name': participant.get('name', 'Desconhecido'),
+                        'picture': participant.get('picture', {}).get('data', {}).get('url', '/static/images/default-avatar.png')
+                    }
+
+        return render_template('messages.html', unique_senders=unique_senders.values())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/get_full_conversation', methods=['GET'])
+def get_full_conversation():
+    sender_id = request.args.get('sender_id')
+    if not sender_id:
+        return jsonify({"error": "Sender ID is required"}), 400
+
+    try:
+        # Busca todas as mensagens de uma conversa
+        url = f"https://graph.facebook.com/v14.0/me/conversations?fields=messages{{message,created_time,from}}&access_token={ACCESS_TOKEN}"
+        response = requests.get(url).json()
+
+        messages = []
+        for conversation in response.get('data', []):
+            for msg in conversation.get('messages', {}).get('data', []):
+                is_sent = msg.get('from', {}).get('id') == PAGE_ID 
+                messages.append({
+                    "text": msg.get("message", ""),
+                    "type": "sent" if is_sent else "received",
+                    "created_time": msg.get("created_time", "Desconhecido")
+                })
+
+        # Filtrar mensagens trocadas com o remetente específico
+        messages = [msg for msg in messages if msg["type"] == "received" or msg["type"] == "sent"]
+
+        return jsonify({"messages": messages})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def get_responded_messages():
+    """
+    Função para buscar os IDs das mensagens respondidas usando uma API.
+    Retorna uma lista de IDs de mensagens já respondidas.
+    """
+    try:
+        # Configuração do endpoint da API
+        url = f"https://graph.facebook.com/v14.0/me/messages?fields=id,to,from,message,reply&access_token={ACCESS_TOKEN}"
+        
+        # Fazer a requisição à API
+        response = requests.get(url)
+        response.raise_for_status()  # Levanta exceção para erros HTTP
+        
+        data = response.json()
+        responded_messages = []
+
+        # Processar as mensagens para identificar respostas
+        for message in data.get('data', []):
+            if 'reply' in message:  # Verifica se há uma resposta associada
+                responded_messages.append(message['id'])
+
+        return responded_messages
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao acessar a API: {e}")
+        return []
+
+# Rota para responder mensagens
+@app.route('/reply_message', methods=['POST'])
+def reply_message():
+    recipient_id = request.form.get('recipient_id')
+    message_text = request.form.get('message_text')
+    
+    if not recipient_id or not message_text:
+        return jsonify({"error": "ID do destinatário ou mensagem estão ausentes."}), 400
+
+    try:
+        # Endpoint da API para enviar mensagens
+        url = f"https://graph.facebook.com/v14.0/me/messages?access_token={ACCESS_TOKEN}"
+        data = {
+            "recipient": {"id": recipient_id},
+            "message": {"text": message_text}
+        }
+        response = requests.post(url, json=data)
+        
+        if response.status_code == 200:
+            return jsonify({"message": "Resposta enviada com sucesso!"}), 200
+        else:
+            return jsonify({"error": response.json()}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.route('/get_posts', methods=['GET'])
+def get_posts():
+    try:
+        # Obter posts do feed do usuário
+        posts = graph.get_connections(id='me', connection_name='posts')
+        
+        # Extrair as informações relevantes dos posts
+        post_data = []
+        for post in posts['data']:
+            # Pegar a mensagem e o ID do post
+            post_id = post.get('id', 'N/A')
+            message = post.get('message', 'Sem mensagem')
+            created_time = post.get('created_time', 'Desconhecido')
+            
+            # Obter métricas de curtidas, comentários e compartilhamentos
+            post_details = graph.get_object(id=post_id, fields='likes.summary(true),comments.summary(true),shares')
+            
+            likes_count = post_details.get('likes', {}).get('summary', {}).get('total_count', 0)
+            comments_count = post_details.get('comments', {}).get('summary', {}).get('total_count', 0)
+            shares_count = post_details.get('shares', {}).get('count', 0)
+            
+            post_data.append({
+                'id': post_id,
+                'message': message,
+                'created_time': created_time,
+                'likes': likes_count,
+                'comments': comments_count,
+                'shares': shares_count
+            })
+
+        return render_template('posts.html', posts=post_data)
+    
+    except Exception as e:
+        return f"Erro ao obter posts: {e}"
+
+
+@app.route('/get_comments/<post_id>', methods=['GET'])
+def get_comments(post_id):
+    try:
+        # Obter os comentários do post
+        comments = graph.get_connections(id=post_id, connection_name='comments')
+        
+        # Extrair as informações relevantes dos comentários
+        comment_data = []
+        for comment in comments.get('data', []):
+            comment_data.append({
+                'id': comment.get('id', 'N/A'),
+                'message': comment.get('message', 'Sem mensagem'),
+                'created_time': comment.get('created_time', 'Desconhecido'),
+                'from': comment.get('from', {}).get('name', 'Anônimo')
+            })
+        
+        return {'comments': comment_data}
+    
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
+@app.route('/reply_comment/<comment_id>', methods=['POST'])
+def reply_comment(comment_id):
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+        
+        # Publicar uma resposta ao comentário
+        graph.put_comment(object_id=comment_id, message=message)
+        
+        return {'message': 'Comentário respondido com sucesso'}, 200
+    
+    except Exception as e:
+        return {'error': str(e)}, 500
+
+
+@app.route('/edit_post/<post_id>', methods=['PUT'])
+def edit_post(post_id):
+    try:
+        data = request.json
+        message = data.get('message')
+        
+        # Atualizar o post usando a Graph API
+        graph.put_object(parent_object=post_id, connection_name='', message=message)
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/delete_post/<post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    try:
+        # Excluir o post usando a Graph API
+        graph.delete_object(id=post_id)
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Página de campanhas
+@app.route('/campanhas', methods=['GET'])
+def listar_campanhas():
+    try:
+        # Obter lista de campanhas
+        response = graph.get_connections(id=AD_ACCOUNT_ID, connection_name='campaigns', fields='id,name,status,objective')
+        campanhas = response.get('data', [])
+
+        return render_template('campanhas.html', campanhas=campanhas)
+    
+    except Exception as e:
+        flash(f"Erro ao listar campanhas: {e}", "danger")
+        return redirect(url_for('listar_campanhas'))
+
+
+@app.route('/campanhas/criar', methods=['POST'])
+def criar_campanha():
+    try:
+        nome = request.form.get('nome')
+        objetivo = request.form.get('objetivo', 'OUTCOME_TRAFFIC')  # Objetivo válido por padrão
+
+        # Criar campanha
+        params = {
+            'name': nome,
+            'status': 'PAUSED',  # Status inicial
+            'objective': objetivo,
+            'special_ad_categories': ['NONE'] 
+        }
+        graph.put_object(parent_object=AD_ACCOUNT_ID, connection_name='campaigns', **params)
+        
+        flash("Campanha criada com sucesso!", "success")
+        return redirect(url_for('listar_campanhas'))
+    
+    except Exception as e:
+        flash(f"Erro ao criar campanha: {e}", "danger")
+        return redirect(url_for('listar_campanhas'))
+
+
+
+# Editar campanha
+@app.route('/campanhas/editar/<campanha_id>', methods=['POST'])
+def editar_campanha(campanha_id):
+    try:
+        nome = request.form.get('nome')
+        status = request.form.get('status', 'PAUSED')  # Pode ser 'ACTIVE', 'PAUSED'
+
+        # Atualizar campanha
+        params = {
+            'name': nome,
+            'status': status
+        }
+        graph.put_object(parent_object=campanha_id, connection_name='', **params)
+
+        flash("Campanha atualizada com sucesso!", "success")
+        return redirect(url_for('listar_campanhas'))
+    
+    except Exception as e:
+        flash(f"Erro ao editar campanha: {e}", "danger")
+        return redirect(url_for('listar_campanhas'))
+
+
+# Excluir campanha
+@app.route('/campanhas/excluir/<campanha_id>', methods=['POST'])
+def excluir_campanha(campanha_id):
+    try:
+        # Excluir campanha
+        graph.delete_object(id=campanha_id)
+
+        flash("Campanha excluída com sucesso!", "success")
+        return redirect(url_for('listar_campanhas'))
+    
+    except Exception as e:
+        flash(f"Erro ao excluir campanha: {e}", "danger")
+        return redirect(url_for('listar_campanhas'))
+
+if __name__ == '__main__':
+    app.run(debug=True)

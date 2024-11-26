@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.stat-card {
+    border-radius: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+button#downloadPDF {
+    transition: background-color 0.3s ease;
+}
+
+button#downloadPDF:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+#engagementChart {
+    max-height: 400px;
+}
+
+</style>
+<div class="container py-5 mt-5">
+    <!-- Título Principal -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Resumo de Engajamento</h1>
+        <p class="text-muted">Veja os principais dados de engajamento dos últimos 30 dias.</p>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row g-4">
+        <!-- Card: Novos Seguidores -->
+        <div class="col-md-3">
+            <div class="card stat-card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Novos Seguidores</h5>
+                    <p>Facebook: <strong>{{ new_facebook_followers }}</strong></p>
+                    <p>Instagram: <strong>{{ new_instagram_followers }}</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Novos Likes -->
+        <div class="col-md-3">
+            <div class="card stat-card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-thumbs-up fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Novos Likes</h5>
+                    <p>Facebook: <strong>{{ new_facebook_likes }}</strong></p>
+                    <p>Instagram: <strong>{{ new_instagram_likes }}</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Novos Comentários -->
+        <div class="col-md-3">
+            <div class="card stat-card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-comments fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">Novos Comentários</h5>
+                    <p>Facebook: <strong>{{ new_facebook_comments }}</strong></p>
+                    <p>Instagram: <strong>{{ new_instagram_comments }}</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Novos Compartilhamentos -->
+        <div class="col-md-3">
+            <div class="card stat-card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-share fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Compartilhamentos</h5>
+                    <p>Facebook: <strong>{{ new_facebook_shares }}</strong></p>
+                    <p>Instagram: <strong>{{ new_instagram_shares }} (N/A)</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="mt-5 p-4 bg-light rounded shadow-sm">
+        <h3 class="text-center">Tendências de Engajamento</h3>
+
+        <canvas id="engagementChart"></canvas>
+    </div>
+
+    <!-- Botão Flutuante de PDF -->
+    <button id="downloadPDF" class="btn btn-lg btn-primary position-fixed shadow-sm"
+        style="bottom: 150px; right: 50px; border-radius: 50%; width: 60px; height: 60px;">
+        <i class="bi bi-file-earmark-arrow-down"></i>
+    </button>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('engagementChart').getContext('2d');
+
+// Renderizar Gráfico
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ labels|tojson }},
+        datasets: [
+            {
+                label: 'Likes Facebook',
+                data: {{ facebook_likes_data|tojson }},
+                borderColor: '#4267B2',
+                backgroundColor: 'rgba(66, 103, 178, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Comentários Facebook',
+                data: {{ facebook_comments_data|tojson }},
+                borderColor: '#3b5998',
+                backgroundColor: 'rgba(59, 89, 152, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Likes Instagram',
+                data: {{ instagram_likes_data|tojson }},
+                borderColor: '#E1306C',
+                backgroundColor: 'rgba(225, 48, 108, 0.2)',
+                tension: 0.4,
+            },
+            {
+                label: 'Comentários Instagram',
+                data: {{ instagram_comments_data|tojson }},
+                borderColor: '#F56040',
+                backgroundColor: 'rgba(245, 96, 64, 0.2)',
+                tension: 0.4,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+            },
+            tooltip: {
+                enabled: true,
+                callbacks: {
+                    label: (tooltipItem) =>
+                        `${tooltipItem.dataset.label}: ${tooltipItem.raw} interações`,
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Data',
+                },
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Engajamento',
+                },
+            },
+        },
+    },
+});
+
+    // Gerar PDF
+    document.getElementById('downloadPDF').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        pdf.setFontSize(16);
+        pdf.text('Resumo de Engajamento - Últimos 30 Dias', 20, 20);
+
+        pdf.setFontSize(12);
+        pdf.text('Novos Seguidores:', 20, 40);
+        pdf.text(`Facebook: {{ new_facebook_followers }}`, 30, 50);
+        pdf.text(`Instagram: {{ new_instagram_followers }}`, 30, 60);
+
+        pdf.text('Novos Likes:', 20, 80);
+        pdf.text(`Facebook: {{ new_facebook_likes }}`, 30, 90);
+        pdf.text(`Instagram: {{ new_instagram_likes }}`, 30, 100);
+
+        pdf.text('Novos Comentários:', 20, 120);
+        pdf.text(`Facebook: {{ new_facebook_comments }}`, 30, 130);
+        pdf.text(`Instagram: {{ new_instagram_comments }}`, 30, 140);
+
+        pdf.text('Novos Compartilhamentos:', 20, 160);
+        pdf.text(`Facebook: {{ new_facebook_shares }}`, 30, 170);
+        pdf.text(`Instagram: {{ new_instagram_shares }} (N/A)`, 30, 180);
+
+        pdf.save('Resumo_Engajamento.pdf');
+    });
+</script>
+
+{% endblock %}

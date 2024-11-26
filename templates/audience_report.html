@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Engajamento</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<h2>Relao</h2>
+
+<canvas id="engagementChart"></canvas>
+
+<script>
+    // Garantindo que os valores sejam sempre convertidos para JSON corretamente
+    const labels = {{ posts | map(attribute='name') | list | default([]) | tojson }};
+    const likes = {{ posts | map(attribute='likes') | list | default([]) | tojson }};
+    const comments = {{ posts | map(attribute='comments') | list | default([]) | tojson }};
+    const shares = {{ posts | map(attribute='shares') | list | default([]) | tojson }};
+
+    // Configuração dos dados para o gráfico
+    const data = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Curtidas',
+                data: likes,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Comentários',
+                data: comments,
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Compartilhamentos',
+                data: shares,
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+
+    // Configuração do gráfico
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw ?? 0;
+                            return ${context.dataset.label}: ${value};
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Posts'
+                    }
+                }
+            }
+        }
+    };
+
+    // Inicialização do gráfico
+    const engagementChart = new Chart(
+        document.getElementById('engagementChart'),
+        config
+    );
+</script>
+</body>
+</html>

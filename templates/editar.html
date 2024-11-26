@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Editar Usuário</h2>
+    <form action="{{ url_for('editar_usuario', id=usuario.id) }}" method="post">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                <select class="form-select" id="role" name="role">
+                    <option value="Admin" {% if usuario.role == "Admin" %}selected{% endif %}>Admin</option>
+                    <option value="Usuario" {% if usuario.role == "Usuario" %}selected{% endif %}>Usuário</option>
+                    <option value="Moderador" {% if usuario.role == "Moderador" %}selected{% endif %}>Moderador</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Salvar</button>
+            <a href="{{ url_for('listar_usuarios') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("form");
+        const nomeInput = document.getElementById("nome");
+        const emailInput = document.getElementById("email");
+        const roleSelect = document.getElementById("role");
+
+        const validateNome = () => {
+            const nome = nomeInput.value.trim(); // Remove espaços extras no início e no final
+            const nomeRegex = /^[a-zA-ZÀ-ÿ\s]+$/; // Permite apenas letras, acentos e espaços
+
+            if (nome === "") {
+                showError(nomeInput, "O nome não pode estar vazio ou ser apenas espaços.");
+                return false;
+            }
+
+            if (!nomeRegex.test(nome)) {
+                showError(nomeInput, "O nome deve conter apenas letras e espaços.");
+                return false;
+            }
+
+            if (nome.length < 3) {
+                showError(nomeInput, "O nome deve ter pelo menos 3 caracteres.");
+                return false;
+            }
+
+            hideError(nomeInput);
+            return true;
+        };
+
+
+        const validateEmail = () => {
+            const email = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError(emailInput, "Por favor, insira um email válido.");
+                return false;
+            }
+            hideError(emailInput);
+            return true;
+        };
+
+        const validateRole = () => {
+            const role = roleSelect.value;
+            if (!role) {
+                showError(roleSelect, "Por favor, selecione uma função válida.");
+                return false;
+            }
+            hideError(roleSelect);
+            return true;
+        };
+
+        const showError = (element, message) => {
+            const errorElement = element.nextElementSibling;
+            if (errorElement && errorElement.classList.contains("error-message")) {
+                errorElement.textContent = message;
+            } else {
+                const error = document.createElement("small");
+                error.classList.add("error-message", "text-danger");
+                error.textContent = message;
+                element.parentElement.appendChild(error);
+            }
+            element.classList.add("is-invalid");
+        };
+
+        const hideError = (element) => {
+            const errorElement = element.nextElementSibling;
+            if (errorElement && errorElement.classList.contains("error-message")) {
+                errorElement.remove();
+            }
+            element.classList.remove("is-invalid");
+        };
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault(); // Impede o envio se houver erros
+            const isNomeValid = validateNome();
+            const isEmailValid = validateEmail();
+            const isRoleValid = validateRole();
+
+            if (isNomeValid && isEmailValid && isRoleValid) {
+                form.submit(); // Submete o formulário se tudo for válido
+            }
+        });
+
+        // Eventos de validação ao vivo
+        nomeInput.addEventListener("input", validateNome);
+        emailInput.addEventListener("input", validateEmail);
+        roleSelect.addEventListener("change", validateRole);
+    });
+
+</script>
+{% endblock %}

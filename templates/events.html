@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos Agendados</title>
+</head>
+<body>
+    <h1>Eventos</h1>
+    <ul>
+        {% for event in events %}
+            <li>{{ event.name }} - {{ event.start_time }} 
+                <a href="https://www.facebook.com/events/{{ event.event_id }}" target="_blank">Ver Evento</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook API - Flask App</title>
+</head>
+<body>
+    <h1>Facebook API - Flask App</h1>
+
+   <!-- Formulário para Postar Mensagem -->
+<h2>Postar Mensagem</h2>
+<form action="/post_message" method="post">
+    <input type="text" name="post_name" placeholder="Nome do Post" required>
+    <textarea name="message" placeholder="Digite sua mensagem" rows="4" cols="50" required></textarea>
+    <button type="submit">Postar Mensagem</button>
+</form>
+
+    <!-- Formulário para Postar Foto com Upload -->
+ <!-- Formulário para Postar Foto -->
+    <h2>Postar Foto</h2>
+    <form action="/post_photo" method="post" enctype="multipart/form-data">
+        <input type="text" name="post_name" placeholder="Nome do Post" required>
+        <input type="text" name="message" placeholder="Legenda da Foto">
+        <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
+        <button type="submit">Postar Foto</button>
+    </form>
+
+    <!-- Formulário para Comentar em um Post -->
+    <h2>Comentar em um Post</h2>
+    <form action="/comment_post" method="post">
+        <select name="post_id" required>
+            <option value="">Selecione o Post</option>
+            {% for post in posts %}
+                <option value="{{ post.post_id }}">{{ post.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="comment" placeholder="Comentário" required>
+        <button type="submit">Comentar</button>
+    </form>
+
+    <!-- Formulário para Obter Número de Curtidas -->
+    <form action="/get_fan_count" method="get">
+        <button type="submit">Obter Número de Curtidas</button>
+    </form>
+
+
+    
+</body>
+</html>

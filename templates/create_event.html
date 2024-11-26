@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Evento</title>
+</head>
+<body>
+    <h1>Criar Evento</h1>
+    <form action="/create_event" method="post">
+        <input type="text" name="event_name" placeholder="Nome do Evento" required><br>
+        <textarea name="event_description" placeholder="Descrição do Evento" required></textarea><br>
+        <input type="datetime-local" name="start_time" required><br>
+        <input type="datetime-local" name="end_time"><br>
+        <button type="submit">Criar Evento</button>
+    </form>
+</body>
+</html>

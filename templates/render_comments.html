@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comentários do Post</title>
+</head>
+<body>
+    <h1>Comentários</h1>
+    <ul>
+        {% for comment in comments %}
+            <li>
+                <p>{{ comment['from']['name'] }}: {{ comment['message'] }}</p>
+                <form action="/reply_comment" method="POST">
+                    <input type="hidden" name="comment_id" value="{{ comment['id'] }}">
+                    <textarea name="reply_message" placeholder="Escreva sua resposta..."></textarea>
+                    <button type="submit">Responder</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

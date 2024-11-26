@@ -1,0 +1,23 @@
+<!-- schedule_post.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendar Post</title>
+</head>
+<body>
+    <h1>Agendar Post no Facebook</h1>
+    <form action="/schedule_post" method="POST">
+        <label for="post_name">Nome do Post:</label>
+        <input type="text" name="post_name" required><br>
+
+        <label for="message">Mensagem:</label>
+        <textarea name="message" required></textarea><br>
+
+        <label for="scheduled_time">Data e Hora de Publicação:</label>
+        <input type="datetime-local" name="scheduled_time" required><br>
+
+        <button type="submit">Agendar</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Selecione um Post</title>
+</head>
+<body>
+    <h1>Selecionar Post para Ver Comentários</h1>
+    <form action="/select_post_comments" method="POST">
+        <label for="post_id">Escolha um Post:</label>
+        <select name="post_id" id="post_id">
+            {% for post in posts %}
+                <option value="{{ post.post_id }}">{{ post.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Ver Comentários</button>
+    </form>
+</body>
+</html>
