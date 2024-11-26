@@ -1197,24 +1197,57 @@ from flask import render_template
 def post_form():
     return render_template('post_instagram.html')
 
+import os
 import requests
 
-def upload_image_to_hosting_service(file_path):
-    """Envia a imagem para um serviço de hospedagem e retorna a URL."""
-    with open(file_path, "rb") as file:
-        response = requests.post(
-            "https://api.imgbb.com/1/upload",
-            params={"key": "bc82e67936f541cc88311ce500bde68b"},
-            files={"image": file}
-        )
+def validate_image(file_path, max_size_mb=5):
+    """
+    Valida o arquivo antes de enviá-lo:
+    - Verifica se o arquivo existe.
+    - Verifica se o formato é suportado (PNG, JPG, JPEG).
+    - Verifica se o tamanho está dentro do limite permitido.
+    """
+    if not os.path.exists(file_path):
+        raise Exception(f"Erro: O arquivo '{file_path}' não existe.")
+    
+    if not file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+        raise Exception("Erro: Apenas arquivos PNG, JPG ou JPEG são suportados.")
+    
+    size_mb = os.path.getsize(file_path) / (1024 * 1024)
+    if size_mb > max_size_mb:
+        raise Exception(f"Erro: O arquivo excede o limite de {max_size_mb}MB. Tamanho atual: {size_mb:.2f}MB.")
+    
+    return True
 
-    if response.status_code == 200:
-        response_data = response.json()
-        return response_data["data"]["url"]
-    else:
-        # Imprime a resposta completa para entender melhor o erro
-        print("Resposta do servidor:", response.text)  # Isso ajuda a entender o erro específico
-        raise Exception(f"Erro ao enviar imagem para o ImgBB. Status code: {response.status_code}")
+def upload_image_to_hosting_service(file_path):
+    """
+    Envia a imagem para ImgBB e retorna a URL.
+    Inclui validação e tratamento detalhado de erros.
+    """
+    # Valida o arquivo antes do envio
+    validate_image(file_path)
+    
+    try:
+        # Abre o arquivo e envia para ImgBB
+        with open(file_path, "rb") as file:
+            response = requests.post(
+                "https://api.imgbb.com/1/upload",
+                params={"key": "bc82e67936f541cc88311ce500bde68b"},  # Substitua pela sua chave real
+                files={"image": file}
+            )
+        
+        # Trata a resposta da API
+        if response.status_code == 200:
+            response_data = response.json()
+            return response_data["data"]["url"]
+        else:
+            # Captura detalhes do erro na resposta
+            raise Exception(f"Erro ao enviar imagem: {response.status_code}. Detalhes: {response.text}")
+    
+    except requests.exceptions.RequestException as e:
+        # Trata erros de conexão ou tempo limite
+        raise Exception(f"Erro de conexão ao enviar imagem: {str(e)}")
+
 
 @app.route('/post_to_instagram', methods=['POST'])
 def post_to_instagram():
