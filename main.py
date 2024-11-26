@@ -1197,6 +1197,8 @@ from flask import render_template
 def post_form():
     return render_template('post_instagram.html')
 
+import requests
+
 def upload_image_to_hosting_service(file_path):
     """Envia a imagem para um serviço de hospedagem e retorna a URL."""
     with open(file_path, "rb") as file:
@@ -1205,13 +1207,14 @@ def upload_image_to_hosting_service(file_path):
             params={"key": "bc82e67936f541cc88311ce500bde68b"},
             files={"image": file}
         )
-    response_data = response.json()
+
     if response.status_code == 200:
+        response_data = response.json()
         return response_data["data"]["url"]
     else:
-        print("Resposta do servidor:", response.text)  # Adiciona o log para entender o erro
+        # Imprime a resposta completa para entender melhor o erro
+        print("Resposta do servidor:", response.text)  # Isso ajuda a entender o erro específico
         raise Exception(f"Erro ao enviar imagem para o ImgBB. Status code: {response.status_code}")
-
 
 @app.route('/post_to_instagram', methods=['POST'])
 def post_to_instagram():
