@@ -183,32 +183,124 @@ const chart = new Chart(ctx, {
 });
 
     // Gerar PDF
-    document.getElementById('downloadPDF').addEventListener('click', () => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
+    // Gerar PDF
+   document.getElementById('downloadPDF').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
 
-        pdf.setFontSize(16);
-        pdf.text('Resumo de Engajamento - Últimos 30 Dias', 20, 20);
+    // Definições iniciais
+    const primaryColor = [0, 102, 204]; // Azul escuro
+    const secondaryColor = [240, 240, 240]; // Cinza claro
+    const textColor = [0, 0, 0]; // Preto
+    const accentColor = [255, 102, 0]; // Laranja (cor de destaque)
 
-        pdf.setFontSize(12);
-        pdf.text('Novos Seguidores:', 20, 40);
-        pdf.text(`Facebook: {{ new_facebook_followers }}`, 30, 50);
-        pdf.text(`Instagram: {{ new_instagram_followers }}`, 30, 60);
+    // Cabeçalho com logotipo fictício da Electo Zone
+    pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.rect(0, 0, 210, 40, 'F'); // Fundo azul para o cabeçalho
 
-        pdf.text('Novos Likes:', 20, 80);
-        pdf.text(`Facebook: {{ new_facebook_likes }}`, 30, 90);
-        pdf.text(`Instagram: {{ new_instagram_likes }}`, 30, 100);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(22);
+    pdf.setTextColor(255, 255, 255); // Texto branco
+    pdf.text('Eletro Zone', 20, 15);
 
-        pdf.text('Novos Comentários:', 20, 120);
-        pdf.text(`Facebook: {{ new_facebook_comments }}`, 30, 130);
-        pdf.text(`Instagram: {{ new_instagram_comments }}`, 30, 140);
+    pdf.setFontSize(12);
+    pdf.setTextColor(200, 200, 200); // Cinza claro
+    pdf.text('Relatório de Engajamento - Últimos 30 Dias', 20, 30);
 
-        pdf.text('Novos Compartilhamentos:', 20, 160);
-        pdf.text(`Facebook: {{ new_facebook_shares }}`, 30, 170);
-        pdf.text(`Instagram: {{ new_instagram_shares }} (N/A)`, 30, 180);
+    // Linha decorativa no cabeçalho
+    pdf.setDrawColor(255, 255, 255); // Branco
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 35, 190, 35);
 
-        pdf.save('Resumo_Engajamento.pdf');
-    });
+    // Seção 1: Novos Seguidores
+    let yOffset = 50;
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.text('Novos Seguidores', 20, yOffset);
+
+    yOffset += 10;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(12);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+    pdf.text(`Facebook: {{ new_facebook_followers }}`, 30, yOffset);
+    yOffset += 10;
+    pdf.text(`Instagram: {{ new_instagram_followers }}`, 30, yOffset);
+
+    // Caixa decorativa cinza
+    yOffset += 15;
+    pdf.setFillColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    pdf.rect(20, yOffset, 170, 1, 'F');
+    yOffset += 10;
+
+    // Seção 2: Novos Likes
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    pdf.text(' Novos Likes', 20, yOffset);
+
+    yOffset += 10;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(12);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+    pdf.text(`Facebook: {{ new_facebook_likes }}`, 30, yOffset);
+    yOffset += 10;
+    pdf.text(`Instagram: {{ new_instagram_likes }}`, 30, yOffset);
+
+    // Caixa decorativa cinza
+    yOffset += 15;
+    pdf.rect(20, yOffset, 170, 1, 'F');
+    yOffset += 10;
+
+    // Seção 3: Novos Comentários
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.text(' Novos Comentários', 20, yOffset);
+
+    yOffset += 10;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(12);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+    pdf.text(`Facebook: {{ new_facebook_comments }}`, 30, yOffset);
+    yOffset += 10;
+    pdf.text(`Instagram: {{ new_instagram_comments }}`, 30, yOffset);
+
+    // Caixa decorativa cinza
+    yOffset += 15;
+    pdf.rect(20, yOffset, 170, 1, 'F');
+    yOffset += 10;
+
+    // Seção 4: Novos Compartilhamentos
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    pdf.text('Novos Compartilhamentos', 20, yOffset);
+
+    yOffset += 10;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(12);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+    pdf.text(`Facebook: {{ new_facebook_shares }}`, 30, yOffset);
+    yOffset += 10;
+    pdf.text(`Instagram: {{ new_instagram_shares }} (N/A)`, 30, yOffset);
+
+    // Caixa decorativa cinza
+    yOffset += 15;
+    pdf.rect(20, yOffset, 170, 1, 'F');
+
+    // Rodapé estilizado
+    pdf.setFillColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    pdf.rect(0, 280, 210, 20, 'F'); // Fundo cinza do rodapé
+
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "italic");
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Relatório gerado automaticamente por Eletro Zone ', 105, 290, null, null, 'center');
+
+    // Salvar PDF
+    pdf.save('Relatorio_Electo_Zone.pdf');
+});
 </script>
 
 {% endblock %}
